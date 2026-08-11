@@ -10,6 +10,13 @@ Changes are tagged: **[wrapper]** for Python/JS wrapper, **[binary]** for Chromi
 
 ---
 
+## [0.5.7] — 2026-08-11
+
+- **[wrapper]** Preserve the caller-specified `delay` for humanized key press actions instead of replacing it with an immediate key-up or an internally generated hold time. Covers page, frame, locator, element-handle, and keyboard press paths across Python, JavaScript Playwright/Puppeteer, and .NET.
+- **[wrapper]** Apply `humanize=True` recursively to frames nested more than one level deep instead of patching only the main frame and its direct children. Python and JavaScript Playwright.
+
+---
+
 ## [0.5.6] — 2026-08-08
 
 - **[wrapper]** Fix `humanize=True` triggering invisible CAPTCHA challenges during clicks. Humanized pre-click checks are now stealth-safe without sacrificing actionability, smooth scrolling, accurate targeting, or common selector support. Python, JavaScript, and .NET.
