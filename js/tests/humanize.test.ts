@@ -1545,6 +1545,50 @@ describe("humanScrollIntoView", () => {
     await humanScrollIntoView(page, raw, getBox, 0, 0, cfg);
     expect(raw.wheel).toHaveBeenCalled();
   }, 15000);
+
+  it("bails without scrolling when a fully-visible element is above the zone and the page is at the top (regression)", async () => {
+    const { humanScrollIntoView } = await import("../src/human/scroll.js");
+    const cfg = resolveConfig("default");
+
+    // viewport 720 -> zone [144, 576]; element top=50 is above the zone but fully visible.
+    const page: any = {
+      viewportSize: () => ({ width: 1280, height: 720 }),
+      evaluate: vi.fn(async () => ({ y: 0, maxY: 2000 })), // scrolled to the very top
+    };
+    const raw = {
+      move: vi.fn(async () => { }), down: vi.fn(async () => { }),
+      up: vi.fn(async () => { }), wheel: vi.fn(async () => { }),
+    };
+    const topBox = { x: 200, y: 50, width: 50, height: 30 };
+
+    const result = await humanScrollIntoView(page, raw, async () => topBox, 0, 0, cfg);
+
+    expect(result.didScroll).toBe(false);
+    expect(raw.wheel).not.toHaveBeenCalled();
+  });
+
+  it("still scrolls a fully-visible above-zone element when the page CAN scroll up (no over-bail)", async () => {
+    const { humanScrollIntoView } = await import("../src/human/scroll.js");
+    const cfg = resolveConfig("default", {
+      scroll_overshoot_chance: 0,
+      scroll_pre_move_delay: [0, 1], scroll_pause_fast: [0, 1],
+      scroll_pause_slow: [0, 1], scroll_settle_delay: [0, 1],
+    });
+
+    const page: any = {
+      viewportSize: () => ({ width: 1280, height: 720 }),
+      evaluate: vi.fn(async () => ({ y: 500, maxY: 2000 })), // room to scroll up
+    };
+    const raw = {
+      move: vi.fn(async () => { }), down: vi.fn(async () => { }),
+      up: vi.fn(async () => { }), wheel: vi.fn(async () => { }),
+    };
+    const topBox = { x: 200, y: 50, width: 50, height: 30 };
+
+    await humanScrollIntoView(page, raw, async () => topBox, 0, 0, cfg);
+
+    expect(raw.wheel).toHaveBeenCalled();
+  }, 15000);
 });
 
 describe("el.scrollIntoViewIfNeeded humanization", () => {
