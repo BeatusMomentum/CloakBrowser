@@ -522,6 +522,31 @@ describe("patchPage frame patching", () => {
     expect(mainFrame.locator).not.toHaveBeenCalled();
   });
 
+  it("selectOption does not infinitely recurse through the patched main frame (regression)", async () => {
+    // page.selectOption re-dispatches to the patched main frame; originals must
+    // bind to the frame's native method or humanSelectOptionFn loops forever.
+    const { patchPage } = await import("../src/human/index.js");
+
+    const nativeSelect = vi.fn(async () => ["b"]);
+    const mainFrame = { ...buildMockFrame(), childFrames: vi.fn(() => []), selectOption: nativeSelect };
+    const page = buildMockPage({ mainFrameReturn: mainFrame });
+
+    // Mimic Playwright: the page's own selectOption delegates to the main frame's,
+    // with a depth guard so a regression throws instead of hanging the test.
+    let depth = 0;
+    page.selectOption = (sel: string, val: any, opts: any) => {
+      if (++depth > 5) throw new Error("RECURSION: selectOption re-dispatched to itself");
+      return page.mainFrame().selectOption(sel, val, opts);
+    };
+
+    const cfg = resolveConfig("default", { mouse_min_steps: 1, mouse_max_steps: 1 });
+    patchPage(page as any, cfg, { x: 0, y: 0, initialized: true } as any);
+
+    await expect((page as any).selectOption("#s", "b", { timeout: 2000 })).resolves.toBeDefined();
+    expect(nativeSelect).toHaveBeenCalledTimes(1);
+    expect(depth).toBe(0); // the delegating page.selectOption was never re-entered
+  }, 30000);
+
   it.each([
     ["type", async (frame: any) => frame.type("input.email", "@")],
     ["fill", async (frame: any) => frame.fill("input.email", "@")],

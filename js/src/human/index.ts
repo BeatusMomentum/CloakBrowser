@@ -240,7 +240,9 @@ function patchPage(page: Page, cfg: HumanConfig, cursor: CursorState): void {
     fill: page.fill.bind(page),
     check: page.check.bind(page),
     uncheck: page.uncheck.bind(page),
-    selectOption: page.selectOption.bind(page),
+    // Bind to the main frame, not the page: page.selectOption re-dispatches to the
+    // patched main-frame method, so binding to the page would loop forever.
+    selectOption: page.mainFrame().selectOption.bind(page.mainFrame()),
     press: page.press.bind(page),
     goto: page.goto.bind(page),
     isChecked: page.isChecked.bind(page),
