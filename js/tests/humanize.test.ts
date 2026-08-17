@@ -465,9 +465,12 @@ describe("patchPage frame patching", () => {
     patchPage(page as any, cfg, cursor as any);
     await page.goto("https://example.com");
 
-    expect(page.on).toHaveBeenCalledTimes(1);
-    const [eventName, handler] = page.on.mock.calls[0];
-    expect(eventName).toBe("frameattached");
+    // Two listeners are wired once: frameattached (patch dynamic frames) and
+    // framenavigated (invalidate the isolated world — #507).
+    expect(page.on).toHaveBeenCalledTimes(2);
+    const attachedCall = page.on.mock.calls.find((c: any[]) => c[0] === "frameattached");
+    expect(attachedCall).toBeDefined();
+    const handler = attachedCall[1];
 
     const attachedFrame = buildMockFrame();
     const originalClick = attachedFrame.click;
@@ -478,6 +481,29 @@ describe("patchPage frame patching", () => {
     expect((attachedFrame as any)._humanPatched).toBe(true);
     expect(patchedClick).not.toBe(originalClick);
     expect(attachedFrame.click).toBe(patchedClick);
+  });
+
+  it("invalidates the isolated world on main-frame navigation, not subframes (#507)", async () => {
+    const { patchPage } = await import("../src/human/index.js");
+
+    const mainFrame = { ...buildMockFrame(), childFrames: vi.fn(() => []) };
+    const page = buildMockPage({ mainFrameReturn: mainFrame });
+    const cfg = resolveConfig("default");
+    const cursor = { x: 0, y: 0, initialized: false };
+    patchPage(page as any, cfg, cursor as any);
+
+    const invalidateSpy = vi.spyOn((page as any)._stealth, "invalidate");
+    const navCall = page.on.mock.calls.find((c: any[]) => c[0] === "framenavigated");
+    expect(navCall).toBeDefined();
+    const handler = navCall[1];
+
+    // subframe navigation -> no invalidation
+    handler(buildMockFrame());
+    expect(invalidateSpy).not.toHaveBeenCalled();
+
+    // main-frame navigation -> invalidate
+    handler(page.mainFrame());
+    expect(invalidateSpy).toHaveBeenCalledTimes(1);
   });
 
   it("uses frame.locator for frame.click instead of page.click", async () => {
