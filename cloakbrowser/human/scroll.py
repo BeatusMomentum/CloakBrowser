@@ -155,7 +155,8 @@ def _scroll_y_into_view(
 
     # Already fully visible but off-center, with the page pinned at the boundary
     # in the needed direction: scrolling can't help, so don't waste the budget.
-    fully_visible = box["y"] >= 0 and box["y"] + box["height"] <= viewport_height
+    # 1px slack: layout can report a top edge of -1/64 px on an unscrolled page.
+    fully_visible = box["y"] >= -1 and box["y"] + box["height"] <= viewport_height + 1
     if fully_visible:
         zone_mid = viewport_height * (cfg.scroll_target_zone[0] + cfg.scroll_target_zone[1]) / 2
         need_up = box["y"] + box["height"] / 2 < zone_mid

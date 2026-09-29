@@ -139,6 +139,20 @@ public class ScrollFallbackTests
     }
 
     [Fact]
+    public async Task Subpixel_negative_top_at_page_top_bails_without_scrolling()
+    {
+        // Layout reports top=-1/64 px on an unscrolled page; still fully visible.
+        var page = new ViewportPage((1000, 700), scroll: (0, 0, 0, 0));
+        var mouse = new CountingMouse();
+        Func<Task<BoundingBox?>> getBox = () => Task.FromResult<BoundingBox?>(new BoundingBox(200, -0.015625, 200, 21.5));
+
+        var result = await HumanScroll.HumanScrollIntoViewAsync(page, mouse, getBox, 0, 0, FastConfig());
+
+        Assert.False(result.DidScroll);
+        Assert.Equal(0, mouse.WheelCalls);
+    }
+
+    [Fact]
     public async Task Fully_visible_above_zone_with_room_still_scrolls()
     {
         // Same element, but the page is scrolled down (y=500) so it CAN scroll up.

@@ -141,7 +141,8 @@ async function scrollYIntoView<T extends ElementBounds>(
     return { box, cursorX, cursorY, didScroll: false };
   }
 
-  const fullyVisible = box.y >= 0 && box.y + box.height <= viewport.height;
+  // 1px slack: layout can report a top edge of -1/64 px on an unscrolled page.
+  const fullyVisible = box.y >= -1 && box.y + box.height <= viewport.height + 1;
   if (fullyVisible) {
     const zoneMid = viewport.height * (cfg.scroll_target_zone[0] + cfg.scroll_target_zone[1]) / 2;
     const needUp = box.y + box.height / 2 < zoneMid;

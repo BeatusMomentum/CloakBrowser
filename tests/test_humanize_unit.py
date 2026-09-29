@@ -2377,6 +2377,26 @@ class TestScrollIntoViewIfNeeded:
         assert box == clipped_box
         assert not raw.wheel.called
 
+    def test_human_scroll_into_view_subpixel_negative_top_at_page_top_bails(self):
+        """Layout reports top=-1/64 px on an unscrolled page. Still fully visible,
+        so the pinned-at-top check must stop a pointless upward scroll."""
+        from cloakbrowser.human.scroll import human_scroll_into_view
+        from cloakbrowser.human.config import resolve_config
+        from unittest.mock import MagicMock
+
+        cfg = resolve_config("default", None)
+        page = MagicMock()
+        page.viewport_size = {"width": 1000, "height": 700}
+        page._stealth_world.evaluate.return_value = {"y": 0, "maxY": 0, "x": 0, "minX": 0, "maxX": 0}
+        raw = MagicMock()
+        top_box = {"x": 200, "y": -0.015625, "width": 200, "height": 21.5}
+
+        _, _, _, did_scroll = human_scroll_into_view(
+            page, raw, lambda: top_box, 0, 0, cfg,
+        )
+        assert not did_scroll
+        assert not raw.wheel.called
+
     def test_human_scroll_into_view_scrolls_x_left_on_rtl_page(self):
         """RTL page at its start (scrollX 0, range -600..0): a box in the left
         overflow gets negative horizontal wheel events."""

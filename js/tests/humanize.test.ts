@@ -1634,6 +1634,27 @@ describe("humanScrollIntoView", () => {
     expect(page.evaluate).not.toHaveBeenCalled();
   });
 
+  it("bails when layout reports a sub-pixel negative top on an unscrolled page", async () => {
+    const { humanScrollIntoView } = await import("../src/human/scroll.js");
+    const cfg = resolveConfig("default");
+
+    const page: any = {
+      viewportSize: () => ({ width: 1000, height: 700 }),
+      evaluate: vi.fn(),
+      _stealth: { evaluate: vi.fn(async () => ({ y: 0, maxY: 0, x: 0, minX: 0, maxX: 0 })) },
+    };
+    const raw = {
+      move: vi.fn(async () => { }), down: vi.fn(async () => { }),
+      up: vi.fn(async () => { }), wheel: vi.fn(async () => { }),
+    };
+    const topBox = { x: 200, y: -0.015625, width: 200, height: 21.5 };
+
+    const result = await humanScrollIntoView(page, raw, async () => topBox, 0, 0, cfg);
+
+    expect(result.didScroll).toBe(false);
+    expect(raw.wheel).not.toHaveBeenCalled();
+  });
+
   it("still scrolls a fully-visible above-zone element when the page CAN scroll up (no over-bail)", async () => {
     const { humanScrollIntoView } = await import("../src/human/scroll.js");
     const cfg = resolveConfig("default", {

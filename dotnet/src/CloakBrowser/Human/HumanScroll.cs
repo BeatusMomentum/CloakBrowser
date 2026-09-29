@@ -143,7 +143,8 @@ public static class HumanScroll
 
         // Already fully visible but off-center, with the page pinned at the boundary
         // in the needed direction: scrolling can't help, so don't waste the budget.
-        bool fullyVisible = box.Value.Y >= 0 && box.Value.Y + box.Value.Height <= viewportHeight;
+        // 1px slack: layout can report a top edge of -1/64 px on an unscrolled page.
+        bool fullyVisible = box.Value.Y >= -1 && box.Value.Y + box.Value.Height <= viewportHeight + 1;
         if (fullyVisible)
         {
             double zoneMid = viewportHeight * (cfg.ScrollTargetZone.Min + cfg.ScrollTargetZone.Max) / 2;
