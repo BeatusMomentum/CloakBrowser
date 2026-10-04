@@ -447,7 +447,15 @@ describe("humanType mixed text with CDP", () => {
   });
 
   it("password-like text 'SecurePass!123' uses CDP for '!'", async () => {
-    const cfg = resolveConfig("default", { mistype_chance: 0, typing_delay: 0 });
+    // Zero every random sleep: thinking pauses alone can push 14 chars past the 5s test timeout on CI
+    const cfg = resolveConfig("default", {
+      mistype_chance: 0,
+      typing_delay: 0,
+      typing_pause_chance: 0,
+      shift_down_delay: [0, 0],
+      shift_up_delay: [0, 0],
+      key_hold: [0, 0],
+    });
     const { raw } = buildRawKeyboard();
     const page = buildMockPage();
     const cdpCalls: Array<[string, any]> = [];
