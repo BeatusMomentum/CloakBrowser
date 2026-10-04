@@ -6,6 +6,15 @@ Changes are tagged: **[wrapper]** for Python/JS wrapper, **[binary]** for Chromi
 
 ---
 
+## [0.5.12] — 2026-10-04
+
+- **[wrapper]** Fix `humanize=True` clicks on targets past the right edge of a horizontally overflowing page (#521). Scroll-into-view now also scrolls the x axis, so the click no longer times out with "element is covered by <none>". Python, JavaScript Playwright/Puppeteer, and .NET.
+- **[wrapper]** Scroll-into-view no longer sends a needless upward scroll on an unscrolled page when layout reports a sub-pixel negative top edge. Python, JavaScript, and .NET.
+- **[wrapper]** Fix `humanize=True` typing into `<input type="number">`: a simulated typo on a digit is now always another digit, so the correcting Backspace no longer deletes a real digit (`1999` → `999`) (#573). Python, JavaScript Playwright/Puppeteer, and .NET.
+- **[wrapper]** Dev tooling: vitest 5, playwright-core 1.63 for the JS test suite; CI runs on Node 22. No runtime dependency changes.
+
+---
+
 ## [0.5.11] — 2026-09-24
 
 - **[wrapper]** The first-launch Pro banner now names the current Pro major (v152) instead of v151. Python, JavaScript, and .NET.
