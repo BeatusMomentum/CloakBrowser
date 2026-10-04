@@ -16,6 +16,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { resolveConfig, rand, randRange, sleep } from "../src/human/config.js";
 import { humanType } from "../src/human/keyboard.js";
+import { humanType as puppeteerHumanType } from "../src/human-puppeteer/keyboard.js";
 import { humanMove, humanClick, clickTarget, humanIdle } from "../src/human/mouse.js";
 
 // =========================================================================
@@ -138,6 +139,28 @@ function buildRawKeyboard() {
   };
   return { raw, downKeys, upKeys, insertedChars };
 }
+
+
+// =========================================================================
+// Mistype on digits (#573): a letter typo is rejected by <input type=number>,
+// so the correcting Backspace would eat the previous real digit.
+// =========================================================================
+describe("digit mistypes stay digits", () => {
+  it.each([
+    ["playwright", humanType],
+    ["puppeteer", puppeteerHumanType],
+  ])("%s humanType only types digits for numeric text", async (_name, typeFn) => {
+    const cfg = resolveConfig("default", {
+      mistype_chance: 1, typing_delay: 0, typing_delay_spread: 0, typing_pause_chance: 0,
+      key_hold: [0, 0], mistype_delay_notice: [0, 0], mistype_delay_correct: [0, 0],
+    });
+    for (let i = 0; i < 20; i++) {
+      const { raw, downKeys } = buildRawKeyboard();
+      await (typeFn as any)(buildMockPage(), raw, "0123456789", cfg, null);
+      expect(downKeys.filter((k) => k !== "Backspace").every((k) => /^[0-9]$/.test(k))).toBe(true);
+    }
+  });
+});
 
 
 // =========================================================================
