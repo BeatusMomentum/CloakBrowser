@@ -6,6 +6,14 @@ Changes are tagged: **[wrapper]** for Python/JS wrapper, **[binary]** for Chromi
 
 ---
 
+## [Unreleased]
+
+- **[wrapper]** The first-launch Pro banner now names the current Pro major (v154) instead of v152. Python, JavaScript, and .NET.
+- **[binary]** CloakBrowser Pro Stable is now Chromium `154.0.8037.57.1` on every platform: Linux x64/ARM64, Windows x64, and macOS (Apple Silicon and Intel). macOS moves up from Chromium 151.
+- **[binary]** Linux preview channel (x64/ARM64) is now `154.0.8037.57.2`: much lower CPU in headed mode on GPU-less Linux, safer proxy handling, a more patient license connection with a new `--license-route=auto|direct|proxy` flag, and the Windows persona's system and code fonts now match real Windows by default.
+
+---
+
 ## [0.5.12] — 2026-10-04
 
 - **[wrapper]** Fix `humanize=True` clicks on targets past the right edge of a horizontally overflowing page (#521). Scroll-into-view now also scrolls the x axis, so the click no longer times out with "element is covered by <none>". Python, JavaScript Playwright/Puppeteer, and .NET.
