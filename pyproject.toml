@@ -74,4 +74,7 @@ path = "cloakbrowser/_version.py"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
-markers = ["slow: marks tests that hit live detection sites (deselect with '-m \"not slow\"')"]
+markers = [
+    "slow: marks tests that hit live detection sites (deselect with '-m \"not slow\"')",
+    "real_browser: launches the real binary from the real ~/.cloakbrowser cache (not isolated)",
+]
