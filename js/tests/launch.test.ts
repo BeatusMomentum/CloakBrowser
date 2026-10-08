@@ -461,6 +461,8 @@ describe("launchPersistentContext (unit)", () => {
     };
 
     vi.doMock("playwright-core", () => ({ chromium: mockChromium }));
+    // Fixed fake profile paths: keep the seed file off disk (covered in profile-seed.test.ts).
+    vi.doMock("../src/profile-seed.js", () => ({ persistentSeedArgs: (_d: any, _s: any, a: any) => a }));
   });
 
   afterEach(() => {

@@ -23,6 +23,7 @@ import {
   resolveLicenseKey,
 } from "./license.js";
 import { seedWidevineHint } from "./widevine.js";
+import { persistentSeedArgs } from "./profile-seed.js";
 
 /** @internal Accept both timezone and timezoneId — either works, no warning. Exported for testing. */
 export function resolveTimezone<T extends { timezone?: string; timezoneId?: string }>(options: T): T {
@@ -355,6 +356,7 @@ export async function launchPersistentContext(
   );
   let resolvedArgs = await resolveWebrtcArgs(options);
   resolvedArgs = appendWebrtcExitIp(resolvedArgs, exitIp);
+  resolvedArgs = persistentSeedArgs(options.userDataDir, options.stealthArgs, resolvedArgs);
   const args = buildArgs({ ...options, ...resolved, args: [...(resolvedArgs ?? []), ...proxyArgs] });
   maybeWarnWindowsFonts(args);
 

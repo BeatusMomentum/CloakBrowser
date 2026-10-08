@@ -417,6 +417,8 @@ asyncio.run(main())
 
 Same as `launch_context()`, but with a persistent user profile. Cookies, localStorage, and cache persist across sessions.
 
+A persistent profile keeps its fingerprint seed across launches (stored in `.cloakbrowser-seed` inside the profile; an explicit `--fingerprint=` in `args` overrides it, and a corrupt file is replaced with a warning). To rotate the identity, delete `.cloakbrowser-seed` and the next launch picks a new seed.
+
 Use this when you need to:
 
 - **Stay logged in** across runs (cookies/sessions survive restarts)

@@ -28,6 +28,7 @@ from .config import (
     binary_supports_http_proxy_inline_auth,
     binary_supports_maximized_window,
     get_default_stealth_args,
+    persistent_seed_args,
 )
 from .download import ensure_binary
 from .license import (
@@ -642,6 +643,7 @@ def launch_persistent_context(
     proxy_kwargs, proxy_extra_args = _resolve_proxy_config(proxy, browser_version, license_key, release_channel)
     args = _resolve_webrtc_args(args, proxy)
     args = _append_webrtc_exit_ip(args, exit_ip)
+    args = persistent_seed_args(user_data_dir, stealth_args, args)
     chrome_args = build_args(stealth_args, (args or []) + proxy_extra_args, timezone=timezone, locale=locale, headless=headless, extension_paths=extension_paths, start_maximized=binary_supports_maximized_window(license_key, browser_version, release_channel) and viewport is _VIEWPORT_UNSET and "viewport" not in kwargs and "no_viewport" not in kwargs)
     _maybe_warn_windows_fonts(chrome_args)
 
@@ -804,6 +806,7 @@ async def launch_persistent_context_async(
     proxy_kwargs, proxy_extra_args = _resolve_proxy_config(proxy, browser_version, license_key, release_channel)
     args = _resolve_webrtc_args(args, proxy)
     args = _append_webrtc_exit_ip(args, exit_ip)
+    args = persistent_seed_args(user_data_dir, stealth_args, args)
     chrome_args = build_args(stealth_args, (args or []) + proxy_extra_args, timezone=timezone, locale=locale, headless=headless, extension_paths=extension_paths, start_maximized=binary_supports_maximized_window(license_key, browser_version, release_channel) and viewport is _VIEWPORT_UNSET and "viewport" not in kwargs and "no_viewport" not in kwargs)
     _maybe_warn_windows_fonts(chrome_args)
 
